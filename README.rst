@@ -1,6 +1,8 @@
 Cryptorama
 ===========
 
+|
+
 Description
 -----------
 
@@ -11,6 +13,8 @@ Affine, Multiplicative and Vigenere ciphers.
 For more information, see the `documentation<http://readthedocs.org/cryptorama>`_.
 
 Source code is available on `bitbucket<https://bitbucket.org/bonnie_saunders/cryptorama`_.
+
+|
 
 Installation
 ------------
