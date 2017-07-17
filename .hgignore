@@ -1,0 +1,8 @@
+syntax: glob
+*.pyc
+documentation/doctrees
+documentation/html
+build
+dist
+*.egg-info
+__pycache__
