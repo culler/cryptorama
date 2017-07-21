@@ -103,7 +103,7 @@ class CaesarCipher(AffineCipher):
     A Ceasar cipher is an affine cipher with m = 1.  The key, b, can be provided as a
     letter in the ciphertext alphabet or an integer.
 
-    >>> C = CaesarCipher(key='m')
+    >>> C = CaesarCipher(key='M')
     >>> m = Message('hello, world')
     >>> m
     *hello, world*
@@ -130,19 +130,19 @@ class CaesarCipher(AffineCipher):
         >>> m = Message('hello, world')
         >>> m
         *hello, world*
-        >>> C = CaesarCipher(key='f')
+        >>> C = CaesarCipher(key='F')
         >>> M = C.encrypt(m)
         >>> M
         *MJQQT, BTWQI*
         >>> tries = CaesarCipher.crack(M)
-        >>> tries['b']
+        >>> tries['B']
         *lipps, asvph*
-        >>> tries['f']
+        >>> tries['F']
         *hello, world*
         """
         assert len(plain) == len(ciphertext.alphabet), 'Plaintext alphabet has the wrong size.'
         result = {}
-        for letter in plain:
+        for letter in ciphertext.alphabet:
             cipher = CaesarCipher(letter, plain, ciphertext.alphabet)
             result[letter] = cipher.decrypt(ciphertext)
         return result
