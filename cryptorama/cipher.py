@@ -101,7 +101,7 @@ class AffineCipher(Cipher):
 class CaesarCipher(AffineCipher):
     """
     A Ceasar cipher is an affine cipher with m = 1.  The key, b, can be provided as a
-    letter in the plaintext alphabet or an integer.
+    letter in the ciphertext alphabet or an integer.
 
     >>> C = CaesarCipher(key='m')
     >>> m = Message('hello, world')
@@ -119,7 +119,7 @@ class CaesarCipher(AffineCipher):
         if isinstance(key, int):
             AffineCipher.__init__(self, m=1, b=key, plain=plain, cipher=cipher)
         else:
-            AffineCipher.__init__(self, plain=plain, cipher=cipher, m=1, b=plain(key))
+            AffineCipher.__init__(self, plain=plain, cipher=cipher, m=1, b=cipher(key))
 
     @classmethod
     def crack(cls, ciphertext, plain=small):
