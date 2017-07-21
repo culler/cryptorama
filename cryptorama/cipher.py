@@ -195,7 +195,7 @@ class VigenereCipher(Cipher):
     >>> m = Message('hello, world')
     >>> m
     *hello, world*
-    >>> V = VigenereCipher(keyword='bye')
+    >>> V = VigenereCipher(keyword='BYE')
     >>> M = V.encrypt(m)
     >>> M
     *ICPMM, APPPE*
@@ -207,12 +207,12 @@ class VigenereCipher(Cipher):
         self.keyword, self.plain, self.cipher = keyword, plain, cipher
         assert len(plain) == len(cipher), 'Alphabets must be the same size'
         def shift(letter):
-            n = plain(letter)
+            n = cipher(letter)
             return lambda x : x + n
         self.substitutions = [Substitution(plain, cipher, shift(letter))
                               for letter in keyword]
         def inverse(letter):
-            n = plain(letter)
+            n = cipher(letter)
             return lambda x : x - n
         self.inverses = [Substitution(cipher, plain, inverse(letter))
                              for letter in keyword]
@@ -240,7 +240,7 @@ class VigenereCipher(Cipher):
 
         >>> M = Message('YBRWY JFM N QCGYFR GIL SUZJX WJMFJ. NUJ VVL VBDM VS NUJ HRNAUGIEMIBI WBSMGFHGQS GJUFJX UNG. FTGRYCZJM GMYL TZSJLRI BVR U PMIVHY OJNJJYA F HVHERQ UAI U QNGR. OYFXY NQQNDM GTIX YBR SCPPYY-FZGJL NQF, VY QNX VVLARW. NUJ VVL VBDM YFOTMYQ FHQ QUHLBRI. IAJ XND USYYE OYFXY TWUOGYQ YBR SCPPYY, MCF KUGMYE YIBP BVR UFNXR FHQ XUVI, "DRXMR, YBBXY OTSF FLR RUXNHT KOA TZ LTO. GMYL YBVSE LTO QTHG PHBB NUJ XVRY VX QBWNU RIEJ NUFH GMY ANWXJF." WJMFJ AENHAJX NSX FFCQ, "IIAY QBWLL IUQ. N EATQ JMCPM CF BIEYB ZTLR. GOG NZ V YIBP NUJ XVRY, GMYL BIHQX FYIC IIVSA VY. MB KUE NPR HIYQYPYYQ $10 IIYQUEX."', big)
         >>> VigenereCipher.crack(M)
-        ('fun', *there was a little boy named jesse. the big boys in the neighborhood constantly teased him. sometimes they offered him a choice between a nickel and a dime. jesse always took the nickel-after all, it was bigger. the big boys laughed and laughed. one day after jesse grabbed the nickel, his father took him aside and said, "jesse, those boys are making fun of you. they think you dont know the dime is worth more than the nickel." jesse grinned and said, "dont worry dad. i know which is worth more. but if i took the dime, they would stop doing it. so far ive collected $10 dollars."*)
+        ('FUN', *there was a little boy named jesse. the big boys in the neighborhood constantly teased him. sometimes they offered him a choice between a nickel and a dime. jesse always took the nickel-after all, it was bigger. the big boys laughed and laughed. one day after jesse grabbed the nickel, his father took him aside and said, "jesse, those boys are making fun of you. they think you dont know the dime is worth more than the nickel." jesse grinned and said, "dont worry dad. i know which is worth more. but if i took the dime, they would stop doing it. so far ive collected $10 dollars."*)
         """
         assert len(plain) == len(ciphertext.alphabet), 'Plaintext alphabet has the wrong size.'
         E = ciphertext.clean()
@@ -256,7 +256,7 @@ class VigenereCipher(Cipher):
         # (This is a weak spot: if a multiple of the real keylength is used then the data per
         # substring is less and therefore the analysis is less accurate.)
         substring_freqs = [substrings[i].frequencies() for i in range(keylength)]
-        keyword = cls._find_keyword(E, plain, keylength, substrings, substring_freqs)
+        keyword = cls._find_keyword(E, keylength, substrings, substring_freqs)
         # Decrypt.
         plaintext = cls(keyword, plain, ciphertext.alphabet).decrypt(ciphertext)
         return keyword, plaintext
@@ -273,9 +273,10 @@ class VigenereCipher(Cipher):
         return matches
 
     @staticmethod
-    def _find_keyword(message, plain, keylength, substrings, substring_freqs):
+    def _find_keyword(message, keylength, substrings, substring_freqs):
         keyword=''
-        m = len(message.alphabet)
+        cipher = message.alphabet
+        m = len(cipher)
         def correlation(freqs, j):
             """
             Correlation between a shifted frequency distribution and the frequency
@@ -288,7 +289,7 @@ class VigenereCipher(Cipher):
             correlations = [(j, correlation(substring_freqs[i], j)) for j in range(m)]
             correlations.sort(key = lambda x: x[1], reverse=True)
             # Add that shift to the keyword.
-            keyword += plain[correlations[0][0]]
+            keyword += cipher[correlations[0][0]]
         # Check for periodicity in the keyword and reduce accordingly.        
         for factor in [n for n in range(3, keylength) if keylength % n == 0]: 
             prefix = keyword[:factor]
