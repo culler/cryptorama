@@ -35,6 +35,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
+with open(os.path.join(here, 'cryptorama', 'version.py'), encoding='ascii') as f:
+    exec(f.read())
+    
 def clean():
     html = os.path.join('documentation', 'html')
     doctrees = os.path.join('documentation', 'doctrees')

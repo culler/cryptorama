@@ -6,4 +6,4 @@ from .cipher import (CaesarCipher, MultiplicativeCipher, AffineCipher, Substitut
                     VigenereCipher)
 from .message import Message
 from .alphabet import Alphabet, big, small, upper, lower
-__version__ = '0.1.1'
+from .version import __version__
