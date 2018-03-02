@@ -157,7 +157,7 @@ class Message(str, metaclass=MessageMeta):
         """
         Cleans the message and divides the result into words of equal
         length n (except for the last word, which may be shorter).
-        
+       
         >>> m = Message('hello, world')
         >>> m
         *hello, world*
@@ -169,12 +169,21 @@ class Message(str, metaclass=MessageMeta):
                           for k, g in groupby(enumerate(self.clean()), key=lambda p : p[0]//n))
         return Message(result, self.alphabet)
 
-    def frequencies(self, sort=True):
+    def frequencies(self, sort=False):
         """
         Return a list of pairs (l, f) where l is a letter of the alphabet and f is the
-        frequency at which l appears in this message.  The letters appear in order.
+        frequency at which l appears in this message.  The pairs are sorted by descending
+        frequency if the keyword argument sort is True.  Otherwise they are in the order
+        of the alphabet.
+
+        >>> m = Message('Hello worlds')
+        >>> m.frequencies(sort=True)[:6]
+        [('l', 0.3), ('o', 0.2), ('d', 0.1), ('e', 0.1), ('r', 0.1), ('s', 0.1)]
         """
         alphabet = set(self.alphabet)
         total = float(len([x for x in self if x in alphabet]))
-        return sorted((self.count(x)/total, x) for x in self.alphabet)
-
+        result = [(x, self.count(x)/total) for x in self.alphabet]
+        if sort:
+            return sorted(result, key=lambda x: x[1], reverse=True)
+        else:
+            return result

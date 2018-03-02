@@ -69,7 +69,7 @@ class AffineCipher(Cipher):
     >>> C.decrypt(M)
     *hello, world*
     """
-    def __init__(self, m = 1, b = 0, plain=small, cipher=None):
+    def __init__(self, m = 1, b = 0, plain=small, cipher=big):
         if cipher is None:
             cipher = plain
         assert isinstance(plain, Alphabet) and isinstance(cipher, Alphabet), \
@@ -167,7 +167,7 @@ class SubstitutionCipher(AffineCipher):
     *hello, world*
     """
 
-    def __init__(self, plain, cipher):
+    def __init__(self, plain=small, cipher=big):
         AffineCipher.__init__(self, m=1, b=0, plain=plain, cipher=cipher)
 
 class MultiplicativeCipher(AffineCipher):
