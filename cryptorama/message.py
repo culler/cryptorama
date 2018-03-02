@@ -174,6 +174,7 @@ class Message(str, metaclass=MessageMeta):
         Return a list of pairs (l, f) where l is a letter of the alphabet and f is the
         frequency at which l appears in this message.  The letters appear in order.
         """
-        total = len(self)
-        return [(x, self.count(x)/total) for x in self.alphabet]
+        alphabet = set(self.alphabet)
+        total = float(len([x for x in self if x in alphabet]))
+        return sorted((self.count(x)/total, x) for x in self.alphabet)
 
