@@ -69,7 +69,9 @@ class AffineCipher(Cipher):
     >>> C.decrypt(M)
     *hello, world*
     """
-    def __init__(self, m = 1, b = 0, plain=small, cipher=big):
+    def __init__(self, m = 1, b = 0, plain=small, cipher=None):
+        if cipher is None:
+            cipher = plain
         assert isinstance(plain, Alphabet) and isinstance(cipher, Alphabet), \
             'The arguments "plain" and "cipher" must be Alphabets.'
         assert isinstance(m, int) and isinstance(b, int), \
