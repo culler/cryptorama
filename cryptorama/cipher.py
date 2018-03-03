@@ -151,9 +151,11 @@ class CaesarCipher(AffineCipher):
 
 class SubstitutionCipher(AffineCipher):
     """
-    Provide two alphabets of the same size.  The cipher maps letters of the plaintext
-    alphabet to letters of the ciphertext alphabet in order.  In other words it is an
-    affine cipher with m=1 and b=0.
+    Provide two alphabets of the same size.  The cipher simply maps letters of
+    the plaintext alphabet to letters of the ciphertext alphabet in order.
+    However, this allows arbitrary bijections between two sets of letters
+    since the ciphertext alphabet can specify an arbitary ordering of the
+    letters in the target.
 
     >>> m = Message('hello, world')
     >>> m
