@@ -22,6 +22,7 @@
 from .alphabet import Alphabet, Substitution, big, small
 from .message import Message
 from .data import english
+import re
 
 class Cipher:
     """
@@ -172,6 +173,41 @@ class SubstitutionCipher(AffineCipher):
     def __init__(self, plain=small, cipher=big):
         AffineCipher.__init__(self, m=1, b=0, plain=plain, cipher=cipher)
 
+class KeywordCipher(SubstitutionCipher):
+    """
+    A substitution cipher where the keyword is obtained by removing
+    duplicate letters from the keyword concatenated with the
+    ciphertext alphabet, then shifting by the index of the keyletter.
+    the keyword and keyletter must consist of letters from the
+    ciphertext alphabet.
+
+    >>> c = KeywordCipher('BANANA', 'G')
+    >>> c.cipher
+    UVWXYZBANCDEFGHIJKLMOPQRST
+    >>> M = c.encrypt(Message('hello world'))
+    >>> M
+    *AYEEH QHKEX*
+    >>> c.decrypt(M)
+    *hello world*
+    """
+    
+    def __init__(self, keyword, keyletter, plain=small, cipher=big):
+        cipher_string = str(cipher)
+        assert re.search('[^%s]'%cipher, keyword) is None, 'Invalid keyword'
+        head, sep, tail = str(cipher).partition(keyletter)
+        assert sep != '', 'Key letter is not in the alphabet.'
+        n = len(head)
+        subst = self._undup(keyword + cipher_string)
+        subst = subst[-n:] + subst[:-n]
+        return SubstitutionCipher.__init__(self, plain, Alphabet(subst))
+
+    def _undup(self, x):
+        n = 0
+        while len(x) > n:
+            x = x[:n + 1] + re.sub(x[n], '', x[n+1:])
+            n += 1
+        return x
+    
 class MultiplicativeCipher(AffineCipher):
     """
     A MultiplicativeCipher is an affine cipher with b=0.
