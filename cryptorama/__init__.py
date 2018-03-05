@@ -5,5 +5,5 @@ if sys.version_info.major != 3 or sys.version_info.minor < 5:
 from .cipher import (CaesarCipher, MultiplicativeCipher, AffineCipher, SubstitutionCipher,
                      KeywordCipher, VigenereCipher)
 from .message import Message
-from .alphabet import Alphabet, big, small, upper, lower
+from .alphabet import Alphabet, Substitution, big, small, upper, lower
 from .version import __version__

@@ -150,28 +150,54 @@ class CaesarCipher(AffineCipher):
             result[letter] = cipher.decrypt(ciphertext)
         return result
 
-class SubstitutionCipher(AffineCipher):
+class SubstitutionCipher(Cipher):
     """
-    Provide two alphabets of the same size.  The cipher simply maps letters of
-    the plaintext alphabet to letters of the ciphertext alphabet in order.
-    However, this allows arbitrary bijections between two sets of letters
-    since the ciphertext alphabet can specify an arbitary ordering of the
-    letters in the target.
+    Maps the plaintext alphabet to the ciphertext alphabet by an arbitrary
+    bijection.  The bijection is the composition of the order preserving
+    bijection between the two alphabets followed by a permutation of the
+    ciphertext alphabet.  The permutation is specified as a keyword which is a
+    sequence of letters in the ciphertext alphabet.  When constructing a
+    SubstitutionCipher, pass the keyword as the unique positional argument.
 
     >>> m = Message('hello, world')
     >>> m
     *hello, world*
-    >>> qwerty = Alphabet('QWERTYUIOPASDFGHJKLZXCVBNM')
-    >>> C = SubstitutionCipher(small, qwerty)
-    >>> M = C.encrypt(m)
+    >>> qwerty = 'QWERTYUIOPASDFGHJKLZXCVBNM'
+    >>> S = SubstitutionCipher(qwerty)
+    >>> M = S.encrypt(m)
     >>> M
     *ITSSG, VGKSR*
-    >>> C.decrypt(M)
+    >>> M.alphabet
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    >>> S.decrypt(M)
     *hello, world*
     """
 
-    def __init__(self, plain=small, cipher=big):
-        AffineCipher.__init__(self, m=1, b=0, plain=plain, cipher=cipher)
+    def __init__(self, keyword, plain=small, cipher=big):
+        assert isinstance(plain, Alphabet) and isinstance(cipher, Alphabet), \
+            'The arguments "plain" and "cipher" must be Alphabets.'
+        assert len(keyword) == len(cipher) and set(keyword) == set(cipher), \
+            'Keyword does not define a bijection'
+        self.plain, self.cipher = plain, cipher
+        self.substitution = Substitution(plain, cipher, lambda x: cipher(keyword[x]))
+        self.inverse_dict = dict((cipher(keyword[n]), n) for n in range(len(plain)))
+        self.inverse = Substitution(cipher, plain, lambda y: self.inverse_dict[y])
+
+    def encrypt(self, plaintext):
+        """
+        Returns encryption of plaintext.
+        """
+        assert isinstance(plaintext, Message), 'Plaintext is not a Message instance'
+        assert plaintext.alphabet == self.plain, 'Plaintext does not use the right alphabet'
+        return plaintext.substitute(self.substitution)
+
+    def decrypt(self, ciphertext):
+        """
+        Returns decryption of ciphertext.
+        """
+        assert isinstance(ciphertext, Message), 'Ciphertext is not a Message instance'
+        assert ciphertext.alphabet == self.cipher, 'Ciphertext does not use the right alphabet'
+        return ciphertext.substitute(self.inverse)
 
 class KeywordCipher(SubstitutionCipher):
     """
@@ -181,9 +207,11 @@ class KeywordCipher(SubstitutionCipher):
     the keyword and keyletter must consist of letters from the
     ciphertext alphabet.
 
-    >>> c = KeywordCipher('BANANA', 'G')
+    >>> c = KeywordCipher('BANANA', 'g')
     >>> c.cipher
-    UVWXYZBANCDEFGHIJKLMOPQRST
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    >>> c.encrypt(Message(small))
+    *UVWXYZBANCDEFGHIJKLMOPQRST*
     >>> M = c.encrypt(Message('hello world'))
     >>> M
     *AYEEH QHKEX*
@@ -193,13 +221,15 @@ class KeywordCipher(SubstitutionCipher):
     
     def __init__(self, keyword, keyletter, plain=small, cipher=big):
         cipher_string = str(cipher)
-        assert re.search('[^%s]'%cipher, keyword) is None, 'Invalid keyword'
-        head, sep, tail = str(cipher).partition(keyletter)
+        assert re.search('[^%s]'%cipher, keyword) is None, \
+            'The keyword must consist of letters in the ciphertext alphabet'
+        assert keyletter in plain, 'The keyletter must be in the plaintext alpabet'
+        head, sep, tail = str(cipher).partition(cipher[plain(keyletter)])
         assert sep != '', 'Key letter is not in the alphabet.'
         n = len(head)
-        subst = self._undup(keyword + cipher_string)
-        subst = subst[-n:] + subst[:-n]
-        return SubstitutionCipher.__init__(self, plain, Alphabet(subst))
+        permutation = self._undup(keyword + cipher_string)
+        permutation = permutation[-n:] + permutation[:-n]
+        return SubstitutionCipher.__init__(self, permutation, plain, cipher)
 
     def _undup(self, x):
         n = 0
